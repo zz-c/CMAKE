@@ -13,3 +13,4 @@ project ("CMAKE")
 
 # 包含子项目。
 add_subdirectory ("ffmpeg_test")
+add_subdirectory ("sdl_test")
