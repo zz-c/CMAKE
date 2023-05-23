@@ -2,12 +2,22 @@
 //
 
 #include "main.h"
+#include "Test.h"
+
+extern "C" {
+#include "libavcodec/avcodec.h"
+#include "libavformat/avformat.h"
+}
 
 using namespace std;
 
 int main()
 {
-	cout << "Hello CMake." << endl;
-	getchar();
-	return 0;
+    std::cout << "Test FFmpeg" << std::endl;
+    std::cout << avcodec_configuration() << std::endl;
+    Test* test = new Test();
+    //test->test01();
+    test->testRtsp();
+    //test->testCamera();
+    getchar();
 }
