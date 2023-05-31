@@ -19,4 +19,5 @@ add_subdirectory ("thread_test")
 add_subdirectory ("ffmpeg_sdl_test")
 add_subdirectory ("socket_server_test")
 add_subdirectory ("socket_client_test")
+add_subdirectory ("select_test")
 
