@@ -10,5 +10,9 @@ int main(int argc, char* argv[])
 #else
     std::cout << "Test CMAKE" << std::endl;
 #endif 
+
+#if defined(WIN32) || defined(_WIN32) 
+    std::cout << "WIN32" << std::endl;
+#endif 
     getchar();
 }
