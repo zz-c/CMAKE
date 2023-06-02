@@ -1,6 +1,6 @@
-#include "CommonTypes.h"
-#include "Duplication.h"
 #include <ctime>
+#include <iostream>
+#include "Duplication.h"
 #include "FFmpegEncoder.h"
 #include "Log.h"
 
@@ -48,13 +48,11 @@ int main()
 	{
 		end = clock();
 		duration = (float)(end - start) / (float)CLOCKS_PER_SEC;
-		if (duration > time)
+		if (duration > time){
 			break;
-
-		if (dup.GetFrame())
-		{
-			if (dup.copyFrameDataToBuffer(&buffer, width, height))
-			{
+		}
+		if (dup.GetFrame()){
+			if (dup.copyFrameDataToBuffer(&buffer, width, height)){
 				
 				dup.DoneWithFrame();
 				encoder.frame->pts = counter;
@@ -64,16 +62,12 @@ int main()
 				backupBuffer = buffer;
 				buffer = nullptr;
 				counter++;
-			}
-			else
-			{
+			}else{
 				fprintf(stderr, "Get frame failed!\n");
 				getchar();
 				return 0;
 			}
-		}
-		else
-		{
+		}else{
 			encoder.frame->pts = counter;
 			encoder.ffmpeg_encoder_encode_frame_bgra(backupBuffer);
 			counter++;

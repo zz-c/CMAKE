@@ -1,6 +1,9 @@
 #pragma once
 
-#include"CommonTypes.h"
+
+#include <d3d11.h>
+#include <dxgi1_2.h>
+
 
 class Duplication
 {

@@ -1,9 +1,8 @@
+#include <memory>   //std::unique_ptr
+#include <algorithm>//std::min
 #include"Duplication.h"
 
-Duplication::Duplication():m_DeskDupl(nullptr),
-m_AcquiredDesktopImage(nullptr),
-m_OutputNumber(0),
-m_Device(nullptr)
+Duplication::Duplication():m_DeskDupl(nullptr),m_AcquiredDesktopImage(nullptr),m_OutputNumber(0),m_Device(nullptr)
 {
 }
 
