@@ -8,5 +8,5 @@ aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src SRC_LIST)
 
 add_executable (dxgi_test ${SRC_LIST})
 
-target_link_libraries(dxgi_test opencv_world3410d)
+target_link_libraries(dxgi_test opencv_world3410d d3d11)
 
