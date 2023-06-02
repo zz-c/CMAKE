@@ -22,4 +22,5 @@ add_subdirectory ("socket_client_test")
 add_subdirectory ("socket_udp_server_test")
 add_subdirectory ("socket_udp_client_test")
 add_subdirectory ("select_test")
+add_subdirectory ("dxgi_test")
 
