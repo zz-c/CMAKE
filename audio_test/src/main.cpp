@@ -1,5 +1,4 @@
 ﻿#include <stdio.h>
-#define SDL_MAIN_HANDLED
 #include <SDL.h>
 
 
@@ -29,7 +28,7 @@ void fill_audio(void* udata, Uint8* stream, int len) {
     audio_len -= len;
 }
 
-int main() {
+int main(int argc, char* argv[]){
     const char* filename = "output.pcm";
 
     //Init
@@ -60,7 +59,7 @@ int main() {
     char* pcm_buffer = (char*)malloc(pcm_buffer_size);
     int data_count = 0;
 
-    //Play
+    //Play 参数是非0值就暂停，如果是0值就播放
     SDL_PauseAudio(0);
     size_t nr;
     while (true) {
@@ -89,8 +88,5 @@ int main() {
     }
     free(pcm_buffer);
     SDL_Quit();
-
-
-
     return 0;
 }
