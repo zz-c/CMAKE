@@ -5,6 +5,7 @@
 #define SDL_MAIN_HANDLED
 
 int main(int argc, char* argv[]) {
+    PcmPlayer::test();
     PcmPlayer pcmPlayer;
     pcmPlayer.play();
 
