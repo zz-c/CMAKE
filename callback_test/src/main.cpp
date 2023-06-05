@@ -38,8 +38,14 @@ int main() {
 	std::cout << "c_base_test" << std::endl;
 
 	Fun(callBackFun);
+	Fun([](void) {
+		std::cout << "匿名函数回调" << std::endl;
+	});
 
 	Fun2(callBackFun2,5);
+	Fun2([](int i) {
+		std::cout << "匿名函数2回调" << i << std::endl;
+	},33);
 
 	void (*fPtrz)(int) = callBackFun2;
 	fPtrz(6);
