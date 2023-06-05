@@ -11,9 +11,10 @@ public:
         std::cout << "destruct Test..." << std::endl;
     }
 public:
-    void test01();
+    void testReadMp4();
     int testRtsp();
     int testCamera();
+    int testMp4ToFlv();
 private:
 
 };
