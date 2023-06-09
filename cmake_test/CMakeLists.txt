@@ -1,6 +1,15 @@
 ﻿# CMakeList.txt: sdl_test 的 CMake 项目，在此处包括源代码并定义
 # 项目特定的逻辑。
 #
+add_definitions (-DCOMPILE_M1)
+add_definitions (-DCOMPILE_M2=0x100)
+ 
+add_compile_definitions (COMPILE_M3=0x200)
+ 
+if(COMPILE_M3=0x200)
+    add_compile_definitions (COMPILE_M4)
+endif()
+
 
 message("this is my cmake test")
 message(STATUS "this is my STATUS TEST")
@@ -11,7 +20,7 @@ option (USE_MYDEF "Use provided math implementation" ON)
 set(VAR "VAR_NEW")
 message("1.PROJECT_BINARY_DIR = ${VAR}")
 # 将源代码添加到此项目的可执行文件。
-set(SRC_LIST "main.cpp" "main.h")
+set(SRC_LIST "main.cpp" )
 # 指定可执行文件存放目录
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 add_executable (cmake_test ${SRC_LIST})
