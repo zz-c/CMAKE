@@ -29,4 +29,6 @@ add_subdirectory ("opencv_test")
 add_subdirectory ("dxgi_test")
 add_subdirectory ("dxgi_record_test")
 add_subdirectory ("audio_test")
+add_subdirectory ("jsoncpp_test")
+
 
