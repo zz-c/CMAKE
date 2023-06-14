@@ -31,8 +31,21 @@ int main() {
 	char str2[100];
 	fscanf(fp2, "%s", str2);
 	cout << str2 << endl;
-
 	fclose(fp2);
+
+	//buffer
+	FILE* fp3 = fopen("E:/clib/test.txt", "r");
+	const int BUFFER_SIZE = 2;
+	char buffer[BUFFER_SIZE];
+	memset(buffer, '/0', BUFFER_SIZE);
+	int length = 0;
+	while ((length = fread(buffer, sizeof(char), BUFFER_SIZE, fp3)) > 0) {
+		cout << buffer << endl;
+		memset(buffer, '/0', BUFFER_SIZE);
+	}
+
+
+	
 	
 	return 0;
 }
