@@ -13,6 +13,7 @@ project ("CMAKE")
 
 # 包含子项目。
 add_subdirectory ("callback_test")
+add_subdirectory ("file_test")
 add_subdirectory ("thread_test")
 add_subdirectory ("stl_test")
 add_subdirectory ("cmake_test")
