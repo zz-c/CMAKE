@@ -12,8 +12,9 @@ endif()
  
 message("cmake_test PROJECT_BINARY_DIR = ${PROJECT_BINARY_DIR}")
 option (USE_MYDEF "Use provided math implementation" ON)
-set(VAR "VAR_NEW")
-message("cmake_test PROJECT_BINARY_DIR = ${VAR}")
+set(VAR_SUB "VAR_SUB_TEST")
+message("cmake_test VAR_SUB = ${VAR_SUB}")
+message("cmake_test VAR_SUB = ${VAR_MAIN}")
 # 将源代码添加到此项目的可执行文件。
 set(SRC_LIST "main.cpp" )
 # 指定可执行文件存放目录
