@@ -9,7 +9,14 @@ if (POLICY CMP0141)
   set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
 endif()
 
-project ("CMAKE")
+project ("CMAKE" VERSION 1.2.3.4)
+
+message( STATUS "CMAKE_PROJECT_NAME    = ${CMAKE_PROJECT_NAME}" )
+message( STATUS "PROJECT_VERSION_MAJOR = ${PROJECT_VERSION_MAJOR}" )
+message( STATUS "PROJECT_VERSION_MINOR = ${PROJECT_VERSION_MINOR}" )
+message( STATUS "PROJECT_VERSION_PATCH = ${PROJECT_VERSION_PATCH}" )
+message( STATUS "PROJECT_VERSION_TWEAK = ${PROJECT_VERSION_TWEAK}" )
+message( STATUS "CMAKE_SYSTEM = ${CMAKE_SYSTEM}" )
 
 # 包含子项目。
 add_subdirectory ("callback_test")

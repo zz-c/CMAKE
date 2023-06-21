@@ -9,16 +9,11 @@ add_compile_definitions (COMPILE_M3=0x200)
 if(COMPILE_M3=0x200)
     add_compile_definitions (COMPILE_M4)
 endif()
-
-
-message("this is my cmake test")
-message(STATUS "this is my STATUS TEST")
-message(WARNING  "this is my WARNING TEST")
  
-message("1.PROJECT_BINARY_DIR = ${PROJECT_BINARY_DIR}")
+message("cmake_test PROJECT_BINARY_DIR = ${PROJECT_BINARY_DIR}")
 option (USE_MYDEF "Use provided math implementation" ON)
 set(VAR "VAR_NEW")
-message("1.PROJECT_BINARY_DIR = ${VAR}")
+message("cmake_test PROJECT_BINARY_DIR = ${VAR}")
 # 将源代码添加到此项目的可执行文件。
 set(SRC_LIST "main.cpp" )
 # 指定可执行文件存放目录
