@@ -21,6 +21,13 @@ set(SRC_LIST "main.cpp" )
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 add_executable (cmake_test ${SRC_LIST})
 
+INSTALL(
+        TARGETS cmake_test
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+)
+
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET cmake_test PROPERTY CXX_STANDARD 20)
