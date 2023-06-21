@@ -6,6 +6,10 @@ https://cmake.org
 http://www.ffmpeg.org/
 http://www.libsdl.org/
 
+zzsin
+https://www.zzsin.com/
+https://github.com/redknotmiaoyuqiao
+
 ±±Ð¡²Ë£º
 https://gitee.com/Vanishi
 https://gitee.com/Vanishi/BXC_SipServer
