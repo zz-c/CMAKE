@@ -5,6 +5,7 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
+#include "MMThread.h"
 
 std::deque<int> q;
 std::mutex mu;
@@ -38,11 +39,37 @@ void consumer() {
 	}
 }
 
+class MyMMThread : public MMThread
+{
+private:
+	int a = 0;
+public:
+	MyMMThread(int _a)
+	{
+		a = _a;
+	}
+
+	virtual void run()
+	{
+		while (true) {
+			printf("MyMMThread %d\n", a);
+			std::this_thread::sleep_for(std::chrono::seconds(1));
+		}
+		
+	}
+};
+
 int main() {
-	std::thread t1(producer);
-	std::thread t2(consumer);
-	t1.join();
-	t2.join();
+	//std::thread t1(producer);
+	//std::thread t2(consumer);
+	//t1.join();
+	//t2.join();
+
+	MyMMThread mmThread(10);
+	mmThread.Start();
+	
+	getchar();
+
 
 	return 0;
 }

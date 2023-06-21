@@ -1,8 +1,9 @@
 ﻿# CMakeList.txt CMake 项目，在此处包括源代码并定义
 # 项目特定的逻辑。
 
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR} SRC_LIST)
 
-set(SRC_LIST "main.cpp" )
 add_executable (thread_test ${SRC_LIST})
 
 
