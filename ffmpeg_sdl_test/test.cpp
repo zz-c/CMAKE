@@ -17,9 +17,8 @@ int Test::testRtsp()
 	//初始化网络库 （可以打开rtsp rtmp http 协议的流媒体视频）
 	avformat_network_init();
 
-	const char* url = "rtsp://admin:zz369369@10.52.8.106:554/stream1";
+	const char* url = "rtsp://10.52.8.106:554/stream1";
 	//const char* url = "https://inner-5wge0usz.yangkg.xyz:8000/1E1DD851F4SSXKLS2/stream262.live.flv?st=fYqbrHIOyvVlH3FlGhFNXQ&e=1684834954&t=3&s=2&r=262&uuid=1554d287-79ea-4a5b-bf8e-bc89d84fcdf8";
-	//const char* url = "rtsp://172.26.144.239";
 
 	AVFormatContext* pFormatCtx = avformat_alloc_context();
 	//参数设置
@@ -54,8 +53,7 @@ int Test::testRtsp()
 			video_stream_index = i;
 			fprintf(stdout, "dimensions of the video frame in pixels: width: %d, height: %d, pixel format: %d\n",
 				stream->codecpar->width, stream->codecpar->height, stream->codecpar->format);
-		}
-		else if (stream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
+		}else if (stream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
 			audio_stream_index = i;
 			fprintf(stdout, "audio sample format: %d\n", stream->codecpar->format);
 		}
@@ -91,24 +89,7 @@ int Test::testRtsp()
 	AVPacket* packet = av_packet_alloc();// (AVPacket*)av_malloc(sizeof(AVPacket));
 	AVFrame* pFrame = av_frame_alloc();
 
-	AVFrame* pFrameRGB = av_frame_alloc();
-	//分配视频帧需要内存 (存放原始数据用)
-	int numBytes;		//需要的内存大小
-	uint8_t* buffer = NULL;
-	//获取需要的内存大小
-	/*
-	1. av_image_fill_arrays 函数来关联 frame 和我们刚才分配的内存
-	2. av_malloc 是一个 FFmpeg 的 malloc，
-	主要是对 malloc 做了一些封装来保证地址对齐之类的事情，
-	它会保证你的代码不发生内存泄漏、多次释放或其他 malloc 问题
-	*/
-	numBytes = av_image_get_buffer_size(AV_PIX_FMT_RGB24, pCodecCtx->width, pCodecCtx->height, 1);//获取需要的内存大小
-	buffer = (uint8_t*)av_malloc(numBytes * sizeof(uint8_t));
-	//关联frame和刚才分配的内容
-	av_image_fill_arrays(pFrameRGB->data, pFrameRGB->linesize, buffer, AV_PIX_FMT_RGB24, pCodecCtx->width, pCodecCtx->height, 1);
 
-	SwsContext* sws_ctx = NULL;
-	sws_ctx = sws_getContext(pCodecCtx->width, pCodecCtx->height, pCodecCtx->pix_fmt, pCodecCtx->width, pCodecCtx->height, AV_PIX_FMT_RGB24, SWS_BILINEAR, NULL, NULL, NULL);
 
 	//sdl
 	SwsContext* pSwsCtx = nullptr;

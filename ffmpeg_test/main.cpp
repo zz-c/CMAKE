@@ -19,8 +19,8 @@ int main()
     std::cout << avcodec_configuration() << std::endl;
     Test* test = new Test();
     //test->testReadMp4();
-    //test->testRtsp();
+    test->testRtsp();
     //test->testCamera();
-    test->testMp4ToFlv();
+    //test->testMp4ToFlv();
     getchar();
 }
