@@ -89,8 +89,6 @@ int Test::testRtsp()
 	AVPacket* packet = av_packet_alloc();// (AVPacket*)av_malloc(sizeof(AVPacket));
 	AVFrame* pFrame = av_frame_alloc();
 
-
-
 	//sdl
 	SwsContext* pSwsCtx = nullptr;
 	pSwsCtx = sws_alloc_context();
@@ -105,14 +103,8 @@ int Test::testRtsp()
 		return -1;
 	}
 
-	AVFrame* pFrameYuv = nullptr;
-	pFrameYuv = av_frame_alloc();
-	av_image_alloc(pFrameYuv->data,
-		pFrameYuv->linesize,
-		this->w,
-		this->h,
-		AV_PIX_FMT_YUV420P,
-		1);
+	AVFrame* pFrameYuv = av_frame_alloc();
+	av_image_alloc(pFrameYuv->data,pFrameYuv->linesize,this->w,this->h,AV_PIX_FMT_YUV420P,1);
 
 	SDL_Texture* texture = nullptr;
 	texture = SDL_CreateTexture(render, SDL_PIXELFORMAT_IYUV, SDL_TEXTUREACCESS_TARGET, this->w, this->h);
@@ -136,11 +128,6 @@ int Test::testRtsp()
 			if (ret < 0) {
 				printf("%s", "解码完成");
 			}
-			//if (frameFinished) {
-				//将视频帧原来的格式pCodecCtx->pix_fmt转换成RGB
-				//saveFrame2JPEG(pFrame, pCodecCtx->width, pCodecCtx->height, cnt);
-				//break;
-			//}
 			ret = avcodec_receive_frame(pCodecCtx, pFrame);
 			if (ret != 0) {
 				fprintf(stderr, "avcodec_receive_frame failed !\n");
@@ -162,19 +149,7 @@ int Test::testRtsp()
 				pFrameYuv->data[2], pFrameYuv->linesize[2]);
 			SDL_RenderCopy(render, texture, nullptr, nullptr);
 			SDL_RenderPresent(render);
-
-			//else {
-			//	saveFrame2JPEG(pFrame, pCodecCtx->width, pCodecCtx->height, 0);
-
-			//	sws_scale(sws_ctx, (uint8_t const* const*)pFrame->data, pFrame->linesize, 0, pCodecCtx->height, pFrameRGB->data, pFrameRGB->linesize);
-			//	saveFrame2Ppm(pFrameRGB, pCodecCtx->width, pCodecCtx->height, 0);
-
-			//	break;
-			//}
-			//break;
 		}
-
-
 	}
 
 	avformat_free_context(pFormatCtx);
