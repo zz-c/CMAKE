@@ -6,6 +6,7 @@
 #include <iostream>
 #include<SDL.h>
 #include "Test.h"
+#include "MMQueue.h"
 
 extern "C" {
 #include "libavcodec/avcodec.h"
@@ -16,6 +17,7 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
+    MMQueue<AVFrame> frameQueue;
     //初始化SDL
     if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
     {
@@ -29,9 +31,7 @@ int main(int argc, char* argv[])
     SDL_Rect rect = { 200, 300, 100, 100 };
     SDL_RenderDrawRect(render, &rect);
     SDL_RenderPresent(render);
-
-    std::cout << "Test FFmpeg" << std::endl;
-    std::cout << avcodec_configuration() << std::endl;
+    
     Test* test = new Test(render,800,600);
     test->testRtsp();
     //getchar();

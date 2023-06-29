@@ -12,13 +12,13 @@ extern "C" {
 int Test::testRtsp()
 {
 	std::cout << "testRtsp..." << std::endl;
+	std::cout << avcodec_configuration() << std::endl;
 	//初始化封装库
 	av_register_all();
 	//初始化网络库 （可以打开rtsp rtmp http 协议的流媒体视频）
 	avformat_network_init();
 
 	const char* url = "rtsp://10.52.8.106:554/stream1";
-	//const char* url = "https://inner-5wge0usz.yangkg.xyz:8000/1E1DD851F4SSXKLS2/stream262.live.flv?st=fYqbrHIOyvVlH3FlGhFNXQ&e=1684834954&t=3&s=2&r=262&uuid=1554d287-79ea-4a5b-bf8e-bc89d84fcdf8";
 
 	pFormatCtx = avformat_alloc_context();
 	//参数设置
@@ -120,9 +120,7 @@ int Test::testRtsp()
 			continue;
 		}
 		if (pPacket->stream_index == video_stream_index) {
-			fprintf(stdout, "video stream, packet size: %d\n", pPacket->size);
-
-			//ret = avcodec_decode_video2(pCodecCtx, pFrame, &frameFinished, packet);
+			//fprintf(stdout, "video stream, packet size: %d\n", pPacket->size);
 			ret = avcodec_send_packet(pCodecCtx, pPacket);
 			av_packet_unref(pPacket);
 			if (ret < 0) {
@@ -130,7 +128,7 @@ int Test::testRtsp()
 			}
 			ret = avcodec_receive_frame(pCodecCtx, pFrame);
 			if (ret != 0) {
-				fprintf(stderr, "avcodec_receive_frame failed !\n");
+				//fprintf(stderr, "avcodec_receive_frame failed !\n");
 				char errbuf[128];
 				const char* errbuf_ptr = errbuf;
 				av_strerror(ret, errbuf, sizeof(errbuf));
