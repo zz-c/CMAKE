@@ -3,10 +3,12 @@
 #
 
 # 设置ffmpeg头文件的查找位置
-include_directories("E:/ffmpeg-3.4.2/include")
+#include_directories("E:/ffmpeg-3.4.2/include")
+include_directories("E:/clib/ffmpeg-4.4.1-full_build-shared/include")
 include_directories("E:/clib/SDL2-2.26.5/include")
 # 设置ffmpeg库的查找目录 jar
-link_directories("E:/ffmpeg-3.4.2/lib")
+#link_directories("E:/ffmpeg-3.4.2/lib")
+link_directories("E:/clib/ffmpeg-4.4.1-full_build-shared/lib")
 link_directories("E:/clib/SDL2-2.26.5/lib/x64")
 # 将源代码添加到此项目的可执行文件。
 add_executable (ffmpeg_sdl_test "main.cpp"  "test.h" "test.cpp")
