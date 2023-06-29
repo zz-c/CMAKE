@@ -20,7 +20,7 @@ int Test::testRtsp()
 	const char* url = "rtsp://10.52.8.106:554/stream1";
 	//const char* url = "https://inner-5wge0usz.yangkg.xyz:8000/1E1DD851F4SSXKLS2/stream262.live.flv?st=fYqbrHIOyvVlH3FlGhFNXQ&e=1684834954&t=3&s=2&r=262&uuid=1554d287-79ea-4a5b-bf8e-bc89d84fcdf8";
 
-	AVFormatContext* pFormatCtx = avformat_alloc_context();
+	pFormatCtx = avformat_alloc_context();
 	//参数设置
 	AVDictionary* dictionaryOpts = NULL;
 	//设置rtsp流已tcp协议打开
@@ -60,7 +60,7 @@ int Test::testRtsp()
 	}
 	//获取视频流中的编解码上下文
 	//AVCodecContext* pCodecCtx = pFormatCtx->streams[video_stream_index]->codec;过时
-	AVCodecContext* pCodecCtx = avcodec_alloc_context3(NULL);
+	pCodecCtx = avcodec_alloc_context3(NULL);
 	if (pCodecCtx == NULL)
 	{
 		printf("Could not allocate AVCodecContext\n");
@@ -86,8 +86,8 @@ int Test::testRtsp()
 	printf("视频解码器的名称：%s\n", pCodec->name);
 
 
-	AVPacket* packet = av_packet_alloc();// (AVPacket*)av_malloc(sizeof(AVPacket));
-	AVFrame* pFrame = av_frame_alloc();
+	pPacket = av_packet_alloc();// (AVPacket*)av_malloc(sizeof(AVPacket));
+	pFrame = av_frame_alloc();
 
 	//sdl
 	SwsContext* pSwsCtx = nullptr;
@@ -110,21 +110,21 @@ int Test::testRtsp()
 	texture = SDL_CreateTexture(render, SDL_PIXELFORMAT_IYUV, SDL_TEXTUREACCESS_TARGET, this->w, this->h);
 
 	while (1) {
-		ret = av_read_frame(pFormatCtx, packet);
+		ret = av_read_frame(pFormatCtx, pPacket);
 		if (ret < 0) {
 			fprintf(stderr, "error or end of file: %d\n", ret);
 			continue;
 		}
-		if (packet->stream_index == audio_stream_index) {
+		if (pPacket->stream_index == audio_stream_index) {
 			//fprintf(stdout, "audio stream, packet size: %d\n", packet->size);
 			continue;
 		}
-		if (packet->stream_index == video_stream_index) {
-			fprintf(stdout, "video stream, packet size: %d\n", packet->size);
+		if (pPacket->stream_index == video_stream_index) {
+			fprintf(stdout, "video stream, packet size: %d\n", pPacket->size);
 
 			//ret = avcodec_decode_video2(pCodecCtx, pFrame, &frameFinished, packet);
-			ret = avcodec_send_packet(pCodecCtx, packet);
-			av_packet_unref(packet);
+			ret = avcodec_send_packet(pCodecCtx, pPacket);
+			av_packet_unref(pPacket);
 			if (ret < 0) {
 				printf("%s", "解码完成");
 			}
@@ -151,8 +151,6 @@ int Test::testRtsp()
 			SDL_RenderPresent(render);
 		}
 	}
-
-	avformat_free_context(pFormatCtx);
 	return 0;
 }
 
