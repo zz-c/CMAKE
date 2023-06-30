@@ -90,14 +90,7 @@ int Test::testRtsp()
 	pFrame = av_frame_alloc();
 
 	//sdl
-	SwsContext* pSwsCtx = nullptr;
-	pSwsCtx = sws_alloc_context();
-	ret = sws_init_context(pSwsCtx, nullptr, nullptr);
-	if (ret < 0) {
-		printf("init sws_context failed\n");
-		return -1;
-	}
-	pSwsCtx = sws_getContext(pCodecCtx->width, pCodecCtx->height, pCodecCtx->pix_fmt, this->w, this->h, AV_PIX_FMT_YUV420P, SWS_BICUBIC, nullptr, nullptr, nullptr);
+	SwsContext* pSwsCtx = sws_getContext(pCodecCtx->width, pCodecCtx->height, pCodecCtx->pix_fmt, this->w, this->h, AV_PIX_FMT_YUV420P, SWS_BICUBIC, nullptr, nullptr, nullptr);
 	if (nullptr == pSwsCtx) {
 		printf("get sws context failed\n");
 		return -1;
@@ -133,6 +126,7 @@ int Test::testRtsp()
 				const char* errbuf_ptr = errbuf;
 				av_strerror(ret, errbuf, sizeof(errbuf));
 				fprintf(stderr, "avcodec_receive_frame failed %s\n", errbuf);
+				continue;
 			}
 			ret = sws_scale(pSwsCtx, pFrame->data, pFrame->linesize, 0, pFrame->height, pFrameYuv->data, pFrameYuv->linesize);
 			if (ret < 0) {

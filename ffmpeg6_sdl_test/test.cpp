@@ -62,14 +62,12 @@ int Test::testRtsp()
 	avcodec_parameters_to_context(pCodecCtx, pFormatCtx->streams[video_stream_index]->codecpar);
 	//根据编解码上下文中的编码id查找对应的解码
 	const AVCodec* pCodec = avcodec_find_decoder(pCodecCtx->codec_id);
-	if (pCodec == NULL)
-	{
+	if (pCodec == NULL){
 		printf("%s", "找不到解码器\n");
 		return -1;
 	}
 	//打开解码器
-	if (avcodec_open2(pCodecCtx, pCodec, NULL) < 0)
-	{
+	if (avcodec_open2(pCodecCtx, pCodec, NULL) < 0){
 		printf("%s", "解码器无法打开\n");
 		return -1;
 	}
@@ -83,14 +81,7 @@ int Test::testRtsp()
 	pFrame = av_frame_alloc();
 
 	//sdl
-	SwsContext* pSwsCtx = nullptr;
-	pSwsCtx = sws_alloc_context();
-	ret = sws_init_context(pSwsCtx, nullptr, nullptr);
-	if (ret < 0) {
-		printf("init sws_context failed\n");
-		return -1;
-	}
-	pSwsCtx = sws_getContext(pCodecCtx->width, pCodecCtx->height, pCodecCtx->pix_fmt, this->w, this->h, AV_PIX_FMT_YUV420P, SWS_BICUBIC, nullptr, nullptr, nullptr);
+	SwsContext* pSwsCtx = sws_getContext(pCodecCtx->width, pCodecCtx->height, pCodecCtx->pix_fmt, this->w, this->h, AV_PIX_FMT_YUV420P, SWS_BICUBIC, nullptr, nullptr, nullptr);
 	if (nullptr == pSwsCtx) {
 		printf("get sws context failed\n");
 		return -1;
@@ -126,20 +117,21 @@ int Test::testRtsp()
 				const char* errbuf_ptr = errbuf;
 				av_strerror(ret, errbuf, sizeof(errbuf));
 				fprintf(stderr, "avcodec_receive_frame failed %s\n", errbuf);
+				continue;
 			}
-			//ret = sws_scale(pSwsCtx, pFrame->data, pFrame->linesize, 0, pFrame->height, pFrameYuv->data, pFrameYuv->linesize);
-			//if (ret < 0) {
-			//	printf("sws_scale implement failed\n");
-			//	break;
-			//}
+			ret = sws_scale(pSwsCtx, pFrame->data, pFrame->linesize, 0, pFrame->height, pFrameYuv->data, pFrameYuv->linesize);
+			if (ret < 0) {
+				printf("sws_scale implement failed\n");
+				break;
+			}
 
-			//SDL_RenderClear(render);
-			//SDL_UpdateYUVTexture(texture, nullptr,
-			//	pFrameYuv->data[0], pFrameYuv->linesize[0],
-			//	pFrameYuv->data[1], pFrameYuv->linesize[1],
-			//	pFrameYuv->data[2], pFrameYuv->linesize[2]);
-			//SDL_RenderCopy(render, texture, nullptr, nullptr);
-			//SDL_RenderPresent(render);
+			SDL_RenderClear(render);
+			SDL_UpdateYUVTexture(texture, nullptr,
+				pFrameYuv->data[0], pFrameYuv->linesize[0],
+				pFrameYuv->data[1], pFrameYuv->linesize[1],
+				pFrameYuv->data[2], pFrameYuv->linesize[2]);
+			SDL_RenderCopy(render, texture, nullptr, nullptr);
+			SDL_RenderPresent(render);
 		}
 	}
 
