@@ -2,19 +2,13 @@
 #include<SDL.h>
 
 #include "Test.h"
-extern "C" {
-#include "libavformat/avformat.h"
-#include "libavdevice/avdevice.h"
-#include "libswscale/swscale.h"
-#include "libavutil/imgutils.h" 
-}
 
 int Test::testRtsp()
 {
-	std::cout << "testRtsp..." << std::endl;
-	std::cout << avcodec_configuration() << std::endl;
+	std::cout << "ff testRtsp..." << std::endl;
+	//std::cout << avcodec_configuration() << std::endl;
 	//初始化封装库
-	av_register_all();
+	//av_register_all();
 	//初始化网络库 （可以打开rtsp rtmp http 协议的流媒体视频）
 	avformat_network_init();
 
@@ -53,30 +47,27 @@ int Test::testRtsp()
 			video_stream_index = i;
 			fprintf(stdout, "dimensions of the video frame in pixels: width: %d, height: %d, pixel format: %d\n",
 				stream->codecpar->width, stream->codecpar->height, stream->codecpar->format);
-		}else if (stream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
+		}
+		else if (stream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
 			audio_stream_index = i;
 			fprintf(stdout, "audio sample format: %d\n", stream->codecpar->format);
 		}
 	}
-	//获取视频流中的编解码上下文
-	//AVCodecContext* pCodecCtx = pFormatCtx->streams[video_stream_index]->codec;过时
+
 	pCodecCtx = avcodec_alloc_context3(NULL);
-	if (pCodecCtx == NULL)
-	{
+	if (pCodecCtx == NULL) {
 		printf("Could not allocate AVCodecContext\n");
 		return -1;
 	}
 	avcodec_parameters_to_context(pCodecCtx, pFormatCtx->streams[video_stream_index]->codecpar);
 	//根据编解码上下文中的编码id查找对应的解码
-	AVCodec* pCodec = avcodec_find_decoder(pCodecCtx->codec_id);
-	if (pCodec == NULL)
-	{
+	const AVCodec* pCodec = avcodec_find_decoder(pCodecCtx->codec_id);
+	if (pCodec == NULL) {
 		printf("%s", "找不到解码器\n");
 		return -1;
 	}
 	//打开解码器
-	if (avcodec_open2(pCodecCtx, pCodec, NULL) < 0)
-	{
+	if (avcodec_open2(pCodecCtx, pCodec, NULL) < 0) {
 		printf("%s", "解码器无法打开\n");
 		return -1;
 	}
@@ -97,7 +88,7 @@ int Test::testRtsp()
 	}
 
 	AVFrame* pFrameYuv = av_frame_alloc();
-	av_image_alloc(pFrameYuv->data,pFrameYuv->linesize,this->w,this->h,AV_PIX_FMT_YUV420P,1);
+	av_image_alloc(pFrameYuv->data, pFrameYuv->linesize, this->w, this->h, AV_PIX_FMT_YUV420P, 1);
 
 	SDL_Texture* texture = nullptr;
 	texture = SDL_CreateTexture(render, SDL_PIXELFORMAT_IYUV, SDL_TEXTUREACCESS_TARGET, this->w, this->h);
@@ -113,7 +104,7 @@ int Test::testRtsp()
 			continue;
 		}
 		if (pPacket->stream_index == video_stream_index) {
-			//fprintf(stdout, "video stream, packet size: %d\n", pPacket->size);
+			fprintf(stdout, "video stream, packet size: %d\n", pPacket->size);
 			ret = avcodec_send_packet(pCodecCtx, pPacket);
 			av_packet_unref(pPacket);
 			if (ret < 0) {
@@ -143,6 +134,7 @@ int Test::testRtsp()
 			SDL_RenderPresent(render);
 		}
 	}
+
 	return 0;
 }
 

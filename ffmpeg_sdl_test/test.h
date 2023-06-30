@@ -3,10 +3,11 @@
 #include<SDL.h>
 
 extern "C" {
-#include "libavformat/avformat.h"
-#include "libavdevice/avdevice.h"
-#include "libswscale/swscale.h"
-#include "libavutil/imgutils.h" 
+#include <libavformat/avformat.h>
+#include <libavdevice/avdevice.h>
+#include <libavcodec/avcodec.h>
+#include <libswscale/swscale.h>
+#include <libavutil/imgutils.h>
 }
 
 class Test {
