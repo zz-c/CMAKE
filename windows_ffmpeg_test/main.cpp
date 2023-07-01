@@ -48,15 +48,15 @@ LRESULT CALLBACK    windowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
     return  DefWindowProc(hWnd, msg, wParam, lParam);
 }
 
-void  getResourcePath(HINSTANCE hInstance, char pPath[1024])
-{
-    char    szPathName[1024];
-    char    szDriver[64];
-    char    szPath[1024];
-    GetModuleFileNameA(hInstance, szPathName, sizeof(szPathName));
-    _splitpath(szPathName, szDriver, szPath, 0, 0);
-    sprintf(pPath, "%s%s", szDriver, szPath);
-}
+//void  getResourcePath(HINSTANCE hInstance, char pPath[1024])
+//{
+//    char    szPathName[1024];
+//    char    szDriver[64];
+//    char    szPath[1024];
+//    GetModuleFileNameA(hInstance, szPathName, sizeof(szPathName));
+//    _splitpath(szPathName, szDriver, szPath, 0, 0);
+//    sprintf(pPath, "%s%s", szDriver, szPath);
+//}
 
 int     WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
 {
