@@ -60,5 +60,5 @@ add_subdirectory ("audio_test")
 add_subdirectory ("jsoncpp_test")
 add_subdirectory ("shareptr_test")
 add_subdirectory ("windows_test")
-
+add_subdirectory ("windows_ffmpeg_test")
 
