@@ -19,7 +19,8 @@ int main(){
 
 	cv::Mat bgra_image(duplHeight, duplWidth, CV_8UC4, mBuffer);
 	cv::imwrite(fname, bgra_image);//LNK2019 无法解析的外部符号 d是debug版本，如果是release版本，就不需要加d
-
+	//窗口进行展示
+	//imshow("face", bgra_image);
 
 	cv::CascadeClassifier faceCascade;
 	cv::CascadeClassifier eyesCascade;
