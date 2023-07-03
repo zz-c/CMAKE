@@ -27,6 +27,7 @@ int main(int argc, char* argv[])
 
 	bool quit = false;
 	//循环窗口,不加循环窗口就咻的一下没了- -
+	int offSet = 0;
 	while (!quit)
 	{
 		//循环处理事件
@@ -38,11 +39,12 @@ int main(int argc, char* argv[])
 				quit = true;
 			//这里可以其它事件处理了
 		}
-		SDL_Rect rect = { 200, 300, 100, 100 };
+		SDL_Rect rect = { 200+offSet, 300, 100, 100 };
 		SDL_RenderDrawRect(render, &rect);
 		SDL_RenderPresent(render);
 		//自己设置帧频的时候需要在这里计算delay的时间
 		SDL_Delay(10);
+		offSet++;
 	}
 
 	SDL_DestroyRenderer(render);
