@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
   // 加载图片
-  data = stbi_load("./static/texture/awesomeface.png", &width, &height, &nrChannels, 0);
+  data = stbi_load("G:/project/c/CMAKE/opengl_test2/source/texture007/awesomeface.png", &width, &height, &nrChannels, 0);
 
   if (data)
   {
