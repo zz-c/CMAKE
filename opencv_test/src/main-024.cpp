@@ -8,7 +8,7 @@ const char* OUTPUT_TITLE = "remap demo";
 int index = 0;
 void update_map(void);
 int main(int argc, char** argv) {
-	src = imread("D:/vcprojects/images/test.png");
+	src = imread("test.jpg");
 	if (!src.data) {
 		printf("could not load image...\n");
 		return -1;

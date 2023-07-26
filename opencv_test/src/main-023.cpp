@@ -6,7 +6,7 @@ using namespace cv;
 using namespace std;
 int main(int argc, char** argv) {
 	Mat src, dst;
-	src = imread("D:/vcprojects/images/circle.png");
+	src = imread("test.jpg");
 	if (!src.data) {
 		printf("could not load image...\n");
 		return -1;
