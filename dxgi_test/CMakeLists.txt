@@ -18,5 +18,6 @@ target_link_libraries(d3d9_test opencv_world3410d)
 add_executable (dgi_test src/mainDgi.cpp)
 target_link_libraries(dgi_test opencv_world3410d)
 
-add_executable (winapi_test src/mainWinapi.cpp)
-target_link_libraries(winapi_test opencv_world3410d)
+# 有问题
+#add_executable (winapi_test src/mainWinapi.cpp)
+#target_link_libraries(winapi_test opencv_world3410d)
