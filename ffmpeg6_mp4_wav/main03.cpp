@@ -4,6 +4,9 @@ extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libavutil/opt.h>
+#include <libavutil/channel_layout.h>
+#include <libavutil/samplefmt.h>
+#include <libswresample/swresample.h>
 }
 
 
@@ -81,152 +84,164 @@ void write_wav_header(FILE* file, int sample_rate, int channels, int bits_per_sa
     fwrite(header, 1, 44, file);
 }
 
-int main(int argc, char* argv[]) {
+int mp4ToWav() {
     //const char* url = "rtsp://10.52.8.106:554/stream1";test.mp4
     const char* input_filename = "testu.mp4";
     const char* output_filename = "test.wav";
-    AVFormatContext* format_ctx = NULL;
-    AVCodecContext* codec_ctx = NULL;
-    const AVCodec* decoder = NULL;
-    AVPacket packet;
-    AVFrame* frame = NULL;
-    FILE* output_file = NULL;
-    int ret;
 
-
-
-    // 打开输入文件
-    ret = avformat_open_input(&format_ctx, input_filename, NULL, NULL);
-    if (ret < 0) {
+    AVFormatContext* input_format_ctx = NULL;
+    if (avformat_open_input(&input_format_ctx, input_filename, NULL, NULL) != 0) {
         fprintf(stderr, "Could not open input file\n");
         return -1;
     }
 
-    // 获取音频流信息
-    ret = avformat_find_stream_info(format_ctx, NULL);
-    if (ret < 0) {
+    // Retrieve input stream information
+    if (avformat_find_stream_info(input_format_ctx, NULL) < 0) {
         fprintf(stderr, "Could not find stream information\n");
+        avformat_close_input(&input_format_ctx);
         return -1;
     }
 
-    // 查找音频流
+    // Find the audio stream
     int audio_stream_index = -1;
-    for (int i = 0; i < format_ctx->nb_streams; i++) {
-        if (format_ctx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
-            std::cout << i << "音频信息" << std::endl;
-            std::cout << "sample_rate = " << format_ctx->streams[i]->codecpar->sample_rate << std::endl;
-            std::cout << "channels = " << format_ctx->streams[i]->codecpar->channels << std::endl;
-            std::cout << "frame_size = " << format_ctx->streams[i]->codecpar->frame_size << std::endl;
-            //std::cout << "block_align = " << format_ctx->streams[i]->codecpar->block_align << std::endl;
+    for (int i = 0; i < input_format_ctx->nb_streams; i++) {
+        if (input_format_ctx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
             audio_stream_index = i;
             break;
         }
     }
     if (audio_stream_index == -1) {
         fprintf(stderr, "Could not find audio stream\n");
+        avformat_close_input(&input_format_ctx);
         return -1;
     }
 
-    // 获取音频解码器
-    decoder = avcodec_find_decoder(format_ctx->streams[audio_stream_index]->codecpar->codec_id);
-    if (!decoder) {
-        fprintf(stderr, "Audio decoder not found\n");
+    AVCodecParameters* input_codec_params = input_format_ctx->streams[audio_stream_index]->codecpar;
+
+    // Open input codec
+    const AVCodec* input_codec = avcodec_find_decoder(input_codec_params->codec_id);
+    if (!input_codec) {
+        fprintf(stderr, "Unsupported codec\n");
+        avformat_close_input(&input_format_ctx);
         return -1;
     }
 
-    // 创建解码器上下文
-    codec_ctx = avcodec_alloc_context3(decoder);
-    if (!codec_ctx) {
-        fprintf(stderr, "Could not allocate codec context\n");
+    AVCodecContext* input_codec_ctx = avcodec_alloc_context3(input_codec);
+    if (!input_codec_ctx) {
+        fprintf(stderr, "Failed to allocate codec context\n");
+        avformat_close_input(&input_format_ctx);
+        return -1;
+    }
+    if (avcodec_parameters_to_context(input_codec_ctx, input_codec_params) < 0) {
+        fprintf(stderr, "Failed to copy codec parameters to codec context\n");
+        avcodec_free_context(&input_codec_ctx);
+        avformat_close_input(&input_format_ctx);
+        return -1;
+    }
+    if (avcodec_open2(input_codec_ctx, input_codec, NULL) < 0) {
+        fprintf(stderr, "Failed to open codec\n");
+        avcodec_free_context(&input_codec_ctx);
+        avformat_close_input(&input_format_ctx);
         return -1;
     }
 
-    ret = avcodec_parameters_to_context(codec_ctx, format_ctx->streams[audio_stream_index]->codecpar);
-    if (ret < 0) {
-        fprintf(stderr, "Could not copy codec parameters to context\n");
+    // Output WAV file settings
+    //int output_sample_rate = 44100;
+    int output_channels = input_codec_ctx->channels;
+
+    // Initialize FFmpeg resampler
+    SwrContext* resample_ctx = swr_alloc_set_opts(NULL,
+        av_get_default_channel_layout(input_codec_ctx->channels),
+        AV_SAMPLE_FMT_S16,
+        input_codec_ctx->sample_rate,
+        av_get_default_channel_layout(input_codec_ctx->channels),
+        input_codec_ctx->sample_fmt,
+        input_codec_ctx->sample_rate,
+        0, NULL);
+    if (!resample_ctx || swr_init(resample_ctx) < 0) {
+        fprintf(stderr, "Failed to initialize resampler\n");
+        avcodec_free_context(&input_codec_ctx);
+        avformat_close_input(&input_format_ctx);
         return -1;
     }
 
-    // 打开解码器
-    ret = avcodec_open2(codec_ctx, decoder, NULL);
-    if (ret < 0) {
-        fprintf(stderr, "Could not open codec\n");
-        return -1;
-    }
-
-    // 打开输出文件
-    output_file = fopen(output_filename, "wb");
+    // Open output file
+    FILE* output_file = fopen(output_filename, "wb");
     if (!output_file) {
         fprintf(stderr, "Could not open output file\n");
+        swr_free(&resample_ctx);
+        avcodec_free_context(&input_codec_ctx);
+        avformat_close_input(&input_format_ctx);
         return -1;
     }
 
     // 计算音频帧的总样本数
     int total_samples = 0;
     // 写入 WAV 文件头
-    int sample_rate = codec_ctx->sample_rate;
-    int channels = codec_ctx->channels;
+    int sample_rate = input_codec_ctx->sample_rate;
+    int channels = input_codec_ctx->channels;
     //channels = 1;
-    int bits_per_sample = av_get_bytes_per_sample(codec_ctx->sample_fmt) * 8;
-    std::cout << "codec_ctx->sample_fmt = " << codec_ctx->sample_fmt << std::endl;
-    std::cout << "sample_fmt = " << AV_SAMPLE_FMT_FLTP << std::endl;
+    int bits_per_sample = av_get_bytes_per_sample(AV_SAMPLE_FMT_S16) * 8;
+    std::cout << "bits_per_sample = " << bits_per_sample << std::endl;
     write_wav_header(output_file, sample_rate, channels, bits_per_sample, total_samples);
     fseek(output_file, 44, SEEK_SET);
 
-    // 初始化音频帧
-    frame = av_frame_alloc();
-
-    // 读取音频数据并保存为 WAV 文件
-    while (av_read_frame(format_ctx, &packet) >= 0) {
-        if (total_samples>44100*3) {
-            break;
-        }
+    // Read and resample audio data
+    AVPacket packet;
+    av_init_packet(&packet);
+    AVFrame* input_frame = av_frame_alloc();
+    int buffer_size = av_samples_get_buffer_size(NULL, output_channels, input_codec_ctx->frame_size, AV_SAMPLE_FMT_S16, 1);
+    uint8_t* resampled_buffer = (uint8_t*)av_malloc(buffer_size);
+    while (av_read_frame(input_format_ctx, &packet) >= 0) {
         if (packet.stream_index == audio_stream_index) {
-            //fprintf(stdout, "audio stream, packet size: %d\n", packet.size);
-            ret = avcodec_send_packet(codec_ctx, &packet);
+            int ret = avcodec_send_packet(input_codec_ctx, &packet);
             if (ret < 0) {
-                fprintf(stderr, "Error sending packet for decoding\n");
+                fprintf(stderr, "Error sending a packet for decoding\n");
                 break;
             }
-
             while (ret >= 0) {
-                ret = avcodec_receive_frame(codec_ctx, frame);
-                if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
+                ret = avcodec_receive_frame(input_codec_ctx, input_frame);
+                if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
                     break;
-                } else if (ret < 0) {
+                else if (ret < 0) {
                     fprintf(stderr, "Error during decoding\n");
                     break;
                 }
-                //fprintf(stdout, "frame->nb_samples size: %d,%d\n", codec_ctx->sample_fmt, av_get_bytes_per_sample(codec_ctx->sample_fmt));
-                // 在这里你可以将音频数据写入 WAV 文件
-                // 使用 frame->data 和 frame->linesize 来访问音频数据
-                // 写入解码后的音频数据到 WAV 文件
-                for (int i = 0; i < frame->nb_samples; i++) {
-                    for (int ch = 0; ch < channels; ch++) {
-                        //if (ch!=0) {
-                        //    continue;
-                        //}
-                        fwrite(frame->data[ch] + i * av_get_bytes_per_sample(codec_ctx->sample_fmt), 1, av_get_bytes_per_sample(codec_ctx->sample_fmt), output_file);
-                    }
+
+                // Resample the audio data
+                int samples = swr_convert(resample_ctx, &resampled_buffer, input_frame->nb_samples, (const uint8_t**)input_frame->data, input_frame->nb_samples);
+                if (samples < 0) {
+                    fprintf(stderr, "Error during resampling\n");
+                    break;
                 }
-
-                total_samples += frame->nb_samples;
-
+                int bytes_written = fwrite(resampled_buffer, 1, samples * output_channels * av_get_bytes_per_sample(AV_SAMPLE_FMT_S16), output_file);
+                if (bytes_written != samples * output_channels * av_get_bytes_per_sample(AV_SAMPLE_FMT_S16)) {
+                    fprintf(stderr, "Error writing resampled data to output file\n");
+                    break;
+                }
+                total_samples += input_frame->nb_samples;
             }
         }
         av_packet_unref(&packet);
     }
-    std::cout << "total_samples:" << total_samples << std::endl;
+    std::cout << "wav 生成完成,total_samples:" << total_samples << std::endl;
     // 更新 WAV 文件头中的样本数
     fseek(output_file, 0, SEEK_SET);
     write_wav_header(output_file, sample_rate, channels, bits_per_sample, total_samples);
 
-
-    // 清理资源
-    av_frame_free(&frame);
-    avcodec_free_context(&codec_ctx);
-    avformat_close_input(&format_ctx);
+    // Clean up resources
     fclose(output_file);
+    av_frame_free(&input_frame);
+    av_free(resampled_buffer);
+    swr_free(&resample_ctx);
+    avcodec_free_context(&input_codec_ctx);
+    avformat_close_input(&input_format_ctx);
+    return 0;
+}
+
+int main(int argc, char* argv[]) {
+
+    mp4ToWav();
 
     getchar();
     return 0;
