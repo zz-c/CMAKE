@@ -1,5 +1,11 @@
 ﻿#include <stdio.h>
 #include <iostream>
+#include <string>
+#include <vector>
+#include <windows.h>
+#include <thread>
+#include <mutex>
+
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
@@ -9,6 +15,7 @@ extern "C" {
 #include <libswresample/swresample.h>
 }
 
+std::mutex mtx;
 
 void write_wav_header(FILE* file, int sample_rate, int channels, int bits_per_sample, int total_samples) {
     char header[44];
@@ -84,10 +91,17 @@ void write_wav_header(FILE* file, int sample_rate, int channels, int bits_per_sa
     fwrite(header, 1, 44, file);
 }
 
-int mp4ToWav() {
-    //const char* url = "rtsp://10.52.8.106:554/stream1";test.mp4
-    const char* input_filename = "testu.mp4";
-    const char* output_filename = "test.wav";
+int mp4ToWav(std::string inPath, std::string outPath) {
+    //const char* input_filename = "rtsp://10.52.8.106:554/stream1";test.mp4
+    auto start = std::chrono::high_resolution_clock::now();
+
+    //const char* input_filename = "./input/test.mp4";
+    //std::string full_path = "./output/test";
+    //full_path.append(std::to_string(1));
+    //full_path.append(".wav");
+    //const char* output_filename = full_path.c_str();
+    const char* input_filename = inPath.c_str();
+    const char* output_filename = outPath.c_str();
 
     AVFormatContext* input_format_ctx = NULL;
     if (avformat_open_input(&input_format_ctx, input_filename, NULL, NULL) != 0) {
@@ -182,7 +196,7 @@ int mp4ToWav() {
     int channels = input_codec_ctx->channels;
     //channels = 1;
     int bits_per_sample = av_get_bytes_per_sample(AV_SAMPLE_FMT_S16) * 8;
-    std::cout << "bits_per_sample = " << bits_per_sample << std::endl;
+    //std::cout << "bits_per_sample = " << bits_per_sample << std::endl;
     write_wav_header(output_file, sample_rate, channels, bits_per_sample, total_samples);
     fseek(output_file, 44, SEEK_SET);
 
@@ -224,7 +238,12 @@ int mp4ToWav() {
         }
         av_packet_unref(&packet);
     }
-    std::cout << "wav 生成完成,total_samples:" << total_samples << std::endl;
+    std::unique_lock<std::mutex> lock(mtx);
+
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    std::cout << output_filename << "线程wav 生成完成,用时:" << duration/1000 << std::endl;
+    lock.unlock();
     // 更新 WAV 文件头中的样本数
     fseek(output_file, 0, SEEK_SET);
     write_wav_header(output_file, sample_rate, channels, bits_per_sample, total_samples);
@@ -240,9 +259,65 @@ int mp4ToWav() {
 }
 
 int main(int argc, char* argv[]) {
+    std::cout << "将需要转格式的*.mp4文件放在input目录下。" << std::endl;
+    std::cout << "生成的*.wav文件保存在output目录下。" << std::endl;
+    std::cout << "请指定线程处理上线，超过的文件不进行转换" << std::endl;
+    int maxThreadCount;
+    std::cin >> maxThreadCount;
 
-    mp4ToWav();
+    auto start = std::chrono::high_resolution_clock::now();
+    std::vector<std::thread> threads;
 
-    getchar();
+    int threadCount = 0;
+    //文件扫描
+    WIN32_FIND_DATA findData;
+    HANDLE hFind = FindFirstFile("./input/*.mp4", &findData);
+    if (hFind == INVALID_HANDLE_VALUE) {
+        std::cerr << "Error opening directory" << std::endl;
+        return -1;
+    }
+    do {
+        if (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+            continue;
+        }
+        char* mp4FileName = findData.cFileName;
+        //输入mp4
+        std::string inPath = "./input/";
+        inPath.append(mp4FileName);
+        //输出wav
+        std::string outPath = "./output/";
+        outPath.append(mp4FileName);
+        std::string findStr = "mp4";
+        std::string replaceStr = "wav";
+        size_t pos = outPath.find(findStr);
+        while (pos != std::string::npos) {
+            outPath.replace(pos, findStr.length(), replaceStr);
+            pos = outPath.find(findStr, pos + replaceStr.length());
+        }
+        if (threadCount <  maxThreadCount) {
+            std::cout << "扫描到mp4文件" << inPath << "线程开始执行，生成wav文件" << outPath << std::endl;
+            threads.push_back(std::thread(mp4ToWav, inPath, outPath));
+        } else {
+            std::cout << "扫描到mp4文件" << inPath << "超出线程上线，不生成wav文件" << std::endl;
+        }
+        threadCount++;
+
+    } while (FindNextFile(hFind, &findData) != 0);
+    FindClose(hFind);
+
+    // 创建并启动多个线程
+    //for (int i = 0; i < numThreads; ++i) {
+    //    std::cout << i << "线程开始执行" << std::endl;
+    //    threads.push_back(std::thread(mp4ToWav, i));
+    //}
+
+    // 等待所有线程完成
+    for (std::thread& t : threads) {
+        t.join();
+    }
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    std::cout << "所有线程完成,用时(毫秒):" << duration/1000 << std::endl;
+    system("pause");
     return 0;
 }
