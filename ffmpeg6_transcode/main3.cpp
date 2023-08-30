@@ -17,7 +17,7 @@ int ret = 0;
 //输入输出文件路径
 //Input and output file paths
 const char* inFilePath = "E:/clib/data/test-cg.mp4";
-const char* outFilePath = "rtmp://192.168.3.202:1935/live/out";
+const char* outFilePath = "rtmp://127.0.0.1:1935/live/out";
 
 //输入输出文件句柄
 //Input and output file handles
@@ -152,7 +152,8 @@ void Step3_Operation() {
             trackIndex = packet->stream_index;                                              //记录观察的轨道序号，一般只观察一个轨道序号就行，Record the number of track observed, usually just one orbital number
         }
         else if (trackIndex == packet->stream_index) {
-            int64_t delay = av_rescale_q(packet->dts - firstDts, outStream->time_base, AV_TIME_BASE_Q);     //将相差的dts转换为实际时间间隔，Converts the difference dts to actual time intervals
+            AVRational r = { 1, 1000000 };
+            int64_t delay = av_rescale_q(packet->dts - firstDts, outStream->time_base, r);     //将相差的dts转换为实际时间间隔，Converts the difference dts to actual time intervals
             int64_t intervalTime = av_gettime() - firstTime;
             if (delay > 0 && delay > intervalTime) {
                 av_usleep(delay - intervalTime);
