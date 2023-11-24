@@ -37,7 +37,6 @@ set(VAR_MAIN "VAR_MAIN_TEST")
 # 包含子项目。
 #add_subdirectory ("callback_test")
 #add_subdirectory ("thread_test")
-#add_subdirectory ("stl_test")
 #add_subdirectory ("cmake_test")
 #add_subdirectory ("h264Decoder_test")
 #add_subdirectory ("sdl_test")
