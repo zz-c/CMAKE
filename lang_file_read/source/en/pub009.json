@@ -1,0 +1,12 @@
+{
+  "workspace": "Workspace",
+  "devices": "Devices",
+  "wiFi": "Wi-Fi",
+  "radioSetting": "Radio Setting",
+  "wirelessRateLimiting": "Wireless Rate Limiting",
+  "blocklistAllowlist": "Blocklist/Allowlist",
+  "reboot": "Reboot",
+  "psssword": "Psssword",
+  "reset": "Reset",
+  "test": "test",
+}

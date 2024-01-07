@@ -1,0 +1,11 @@
+{
+  "workspace": "工作台",
+  "devices": "设备管理",
+  "wiFi": "Wi-Fi配置",
+  "radioSetting": "射频配置",
+  "wirelessRateLimiting": "无线限速",
+  "blocklistAllowlist": "黑白名单",
+  "reboot": "网络重启",
+  "psssword": "登录密码",
+  "reset": "恢复出厂"
+}

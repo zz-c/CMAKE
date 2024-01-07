@@ -39,8 +39,30 @@ std::vector<std::string> listFiles(const std::string& path) {
     FindClose(hFind);
     return files;
 }
+std::string UTF8ToGB(const char* str)
+{
+    std::string result;
+    WCHAR* strSrc;
+    LPSTR szRes;
 
+    //获得临时变量的大小
+    int i = MultiByteToWideChar(CP_UTF8, 0, str, -1, NULL, 0);
+    strSrc = new WCHAR[i + 1];
+    MultiByteToWideChar(CP_UTF8, 0, str, -1, strSrc, i);
+
+    //获得临时变量的大小
+    i = WideCharToMultiByte(CP_ACP, 0, strSrc, -1, NULL, 0, NULL, NULL);
+    szRes = new CHAR[i + 1];
+    WideCharToMultiByte(CP_ACP, 0, strSrc, -1, szRes, i, NULL, NULL);
+
+    result = szRes;
+    delete[]strSrc;
+    delete[]szRes;
+
+    return result;
+}
 void readFile(std::string filePath, std::string fileName, std::map<std::string, LangObj>& langObjMap) {
+
     std::ifstream file(filePath);
     if (!file.is_open()) {
         std::cerr << "Error opening file." << std::endl;
@@ -64,11 +86,13 @@ void readFile(std::string filePath, std::string fileName, std::map<std::string, 
         }
         std::string key = line.substr(firstQuote + 1, secondQuote - firstQuote - 1);
         std::string zh = line.substr(thirdQuote + 1, fourthQuote - thirdQuote - 1);
-        std::cout << filePath << " find " << key << " " << zh << std::endl;
+        //std::cout << filePath << " find " << key << " " << zh << std::endl;
+        //std::cout << filePath << " findZZZ " << key << " " << UTF8ToGB(line.c_str()) << std::endl;
 
         LangObj langObj;
         langObj.key = key;
-        langObj.zh = zh;
+        //langObj.zh = zh;
+        langObj.zh = UTF8ToGB(zh.c_str());
         langObj.en = "-";
         langObjMap[fileName+":"+ key] = langObj;
     }
@@ -104,41 +128,57 @@ void readFileEn(std::string filePath, std::string fileName, std::map<std::string
         if (it != langObjMap.end()) {
             it->second.en = en;
         }
+        else {
+            LangObj langObj;
+            langObj.key = key;
+            langObj.zh = "-";
+            langObj.en = en;
+            langObjMap[fileName + ":" + key] = langObj;
+        }
     }
     file.close();
 }
 
-int main() {
-    std::map<std::string, LangObj> langObjMap;
+void createOutFile(std::string filePath, std::map<std::string, LangObj>& langObjMap) {
+    // 创建一个输出文件流
+    std::ofstream outputFile(filePath);
+    // 检查文件是否成功打开
+    if (!outputFile.is_open()) {
+        std::cerr << "打开输出文件失败" << std::endl;
+        return;
+    }
+    outputFile << "文件键值" << ",键值" << ",中文" << ",英文" << std::endl;
+    // 遍历 map
+    for (const auto& pair : langObjMap) {
+        // std::cout << pair.first << "," << pair.second.key << "," << pair.second.zh << "," << pair.second.en << std::endl;
+        //outputFile << pair.first << "," << pair.second.key << "," << pair.second.zh << "," << pair.second.en << std::endl;
+        //outputFile << pair.first << "\t" << pair.second.key << "\t" << pair.second.zh << "\t" << pair.second.en << std::endl;
+        outputFile << pair.first << "," << pair.second.key << "," << "\"" << pair.second.zh << "\"" << "," << "\"" << pair.second.en << "\"" << std::endl;
+    }
+    // 关闭文件流
+    outputFile.close();
+}
 
-    const std::string pathZhDir = "G:/project/c/CMAKE/lang_file_read/source/zh-CN";
-    const std::string pathEnDir = "G:/project/c/CMAKE/lang_file_read/source/en";
-    const std::string outFile = "G:/project/c/CMAKE/lang_file_read/source/out.csv";
+int main() {
+    //const std::string pathZhDir = "G:/project/c/CMAKE/lang_file_read/source/zh-CN";
+    //const std::string pathEnDir = "G:/project/c/CMAKE/lang_file_read/source/en";
+    //const std::string outFile = "G:/project/c/CMAKE/lang_file_read/source/out.csv";
+    const std::string pathZhDir = "./zh-CN";
+    const std::string pathEnDir = "./en";
+    const std::string outFile = "./out.csv";
     std::vector<std::string> filesName = listFiles(pathZhDir);
+    std::map<std::string, LangObj> langObjMap;
     // 打印文件路径
     for (const auto& fileName : filesName) {
-        std::cout << fileName << std::endl;
+        std::cout << "文件" << fileName << "开始读取" << std::endl;
         readFile(pathZhDir + "/" + fileName, fileName, langObjMap);
         readFileEn(pathEnDir + "/" + fileName, fileName, langObjMap);
         std::cout << "文件" << fileName << "读取完成" << std::endl;
     }
 
-    // 创建一个输出文件流
-    std::ofstream outputFile(outFile);
-    // 检查文件是否成功打开
-    if (!outputFile.is_open()) {
-        std::cerr << "打开输出文件失败" << std::endl;
-        return 1;
-    }
-    outputFile << "文件键值" << ",键值" << ",中文" << ",英文" << std::endl;
-    // 遍历 map
-    for (const auto& pair : langObjMap) {
-        std::cout << pair.first << "," << pair.second.key << "," << pair.second.zh << "," << pair.second.en << std::endl;
-        outputFile << pair.first << ", " << pair.second.key << "," << pair.second.zh << "," << pair.second.en << std::endl;
-    }
-    // 关闭文件流
-    outputFile.close();
+    createOutFile(outFile, langObjMap);
     std::cout << "中英文翻译对照生成成功" << std::endl;
 
+    getchar();
     return 0;
 }
