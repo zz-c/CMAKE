@@ -42,6 +42,16 @@ int main() {
         return 1;
     }
     std::cout << "notepadHwnd Value: " << notepadHwnd << std::endl;
+    // ½«´°¿ÚÖÃ¶¥
+    BOOL result = SetWindowPos(notepadHwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+    if (!result) {
+        std::cerr << "Failed to set window position. Error: " << GetLastError() << std::endl;
+    }
+    else {
+        std::cout << "Window set to topmost." << std::endl;
+    }
+
+
 
     DWORD processID =  GetProcessIDByHandle(notepadHwnd);
     std::cout << "processID Value: " << processID << std::endl;
