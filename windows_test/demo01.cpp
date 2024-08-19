@@ -5,7 +5,7 @@
 #define ID_SHOW_BUTTON 2
 #define IDC_EDIT 3
 HINSTANCE hInst;
-int value = 0;; // 用于保存输入的数字变量
+static int value = 0;; // 用于保存输入的数字变量
 
 
 // 窗口过程的回调函数

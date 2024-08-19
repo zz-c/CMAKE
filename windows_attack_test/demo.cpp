@@ -54,7 +54,7 @@ BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam) {
     // 获取窗口标题
     if (GetWindowText(hwnd, windowTitle, sizeof(windowTitle))) {
         // 检查标题是否包含“记事本”网络调试助手 Demo Window
-        if (strstr(windowTitle, "网络调试助手") != NULL) {
+        if (strstr(windowTitle, "Demo Window") != NULL) {
             printf("句柄: %p, 标题: %s\n", hwnd, windowTitle);
             // 找到目标窗口，保存句柄并停止枚举
             HWND* pHwnd = (HWND*)lParam;
@@ -91,7 +91,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             }
             else {
                 char msg[200];
-                snprintf(msg, sizeof(msg), "被攻击程序句柄: %d", hwnd);
+                snprintf(msg, sizeof(msg), "被攻击程序句柄: %p", hwnd);
                 MessageBox(hwnd, msg, "提示", MB_OK);
             }
             // MessageBox(hwnd, "被攻击程序句柄", "提示", MB_OK);
@@ -120,7 +120,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             // 读取内存
 
             HANDLE hProcess;
-            LPCVOID baseAddress = (LPCVOID)0x024831BC; // 目标进程中的起始地址
+            LPCVOID baseAddress = (LPCVOID)0x00FE7134; // 目标进程中的起始地址
             int buffer;
             SIZE_T bytesRead;
 
