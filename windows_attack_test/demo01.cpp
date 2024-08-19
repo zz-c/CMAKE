@@ -5,6 +5,7 @@
 #define ID_SHOW_BUTTON 2
 #define IDC_EDIT 3
 #define ID_WRITE_BUTTON 4
+#define ID_CALL_BUTTON 5
 HINSTANCE hInst;
 int value = 0;; // 用于保存输入的数字变量
 
@@ -81,7 +82,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         CreateWindowEx(0, "BUTTON", "修改内存", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
             250, 100, 80, 30, hwnd, (HMENU)ID_WRITE_BUTTON, hInst, NULL);
         CreateWindowEx(0, "BUTTON", "事件触发", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-            350, 100, 80, 30, hwnd, (HMENU)ID_SHOW_BUTTON, hInst, NULL);
+            350, 100, 80, 30, hwnd, (HMENU)ID_CALL_BUTTON, hInst, NULL);
         return 0;
     case WM_COMMAND:
         switch (LOWORD(wParam)) {
@@ -205,6 +206,83 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                 else {
                     printf("Failed to write memory. Error: %lu\n", GetLastError());
                 }
+
+                // 关闭进程句柄
+                CloseHandle(hProcess);
+                return 0;
+            }
+            case ID_CALL_BUTTON:
+            {
+                printf("case ID_WRITE_BUTTON\n");
+                // 获取窗口句柄
+                HWND hwnd = NULL;
+                EnumWindows(EnumWindowsProc, (LPARAM)&hwnd);
+                if (hwnd == NULL) {
+                    MessageBox(hwnd, "无法找到窗口句柄", "提示", MB_OK);
+                    return 1;
+                }
+                // 获取进程di
+                DWORD processId;
+                DWORD threadId = GetWindowThreadProcessId(hwnd, &processId);
+                if (threadId != 0) {
+                    printf("Thread ID: %lu\n", threadId);
+                    printf("Process ID: %lu\n", processId);
+                }
+                else {
+                    printf("Failed to get thread and process IDs. Error: %lu\n", GetLastError());
+                }
+                // 读取内存
+
+                HANDLE hProcess;
+                LPCVOID baseAddress = (LPCVOID)0x00FE7134; // 目标进程中的起始地址
+                int buffer;
+                SIZE_T bytesRead;
+
+                // 打开目标进程
+                // hProcess = OpenProcess(PROCESS_VM_READ, FALSE, processId);
+                hProcess = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE, FALSE, processId);
+                if (hProcess == NULL) {
+                    printf("Failed to open process. Error: %lu\n", GetLastError());
+                    return 1;
+                }
+                else {
+                    printf("hProcess ID: %lu\n", hProcess);
+                }
+
+                // 读取数据
+                if (ReadProcessMemory(hProcess, baseAddress, &buffer, sizeof(buffer), &bytesRead)) {
+                    printf("Successfully read %zu bytes. Value: %d\n", bytesRead, buffer);
+                }
+                else {
+                    // printf("Failed to read memory. Error: %lu\n", GetLastError());
+                    DWORD error = GetLastError();
+                    if (error == ERROR_PARTIAL_COPY) {
+                        printf("Failed to read memory. Error: %lu (Partial copy)\n", error);
+                    }
+                    else {
+                        printf("Failed to read memory. Error: %lu\n", error);
+                    }
+                }
+
+                // 在目标进程中创建线程并执行
+                HANDLE hThread;
+                LPVOID pRemoteCode = (LPVOID)0x00FE7134;
+
+                // 在目标进程中创建线程并执行 shellcode
+                hThread = CreateRemoteThread(hProcess, NULL, 0, (LPTHREAD_START_ROUTINE)pRemoteCode, NULL, 0, &threadId);
+                if (hThread == NULL) {
+                    printf("Failed to create remote thread. Error: %lu\n", GetLastError());
+                    //VirtualFreeEx(hProcess, pRemoteCode, 0, MEM_RELEASE);
+                    CloseHandle(hProcess);
+                    return 1;
+                }
+
+                printf("Remote thread created successfully.\n");
+                printf("Thread ID: %lu\n", threadId);
+                // 等待线程完成
+                WaitForSingleObject(hThread, INFINITE);
+                // 清理
+                CloseHandle(hThread);
 
                 // 关闭进程句柄
                 CloseHandle(hProcess);
