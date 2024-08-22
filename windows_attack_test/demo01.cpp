@@ -266,7 +266,8 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
                 // 在目标进程中创建线程并执行
                 HANDLE hThread;
-                LPVOID pRemoteCode = (LPVOID)0x00FE7134;
+                // LPVOID pRemoteCode = (LPVOID)0x00FE7134;
+                int pRemoteCode = 0x00FE7134;
 
                 // 在目标进程中创建线程并执行 shellcode
                 hThread = CreateRemoteThread(hProcess, NULL, 0, (LPTHREAD_START_ROUTINE)pRemoteCode, NULL, 0, &threadId);
