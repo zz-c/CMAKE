@@ -6,7 +6,7 @@
 #define IDC_EDIT 3
 #define ID_WRITE_BUTTON 4
 #define ID_CALL_BUTTON 5
-HINSTANCE hInst;
+int valueAddress = 0x00F87170;
 int value = 0;; // 用于保存输入的数字变量
 
 
@@ -21,7 +21,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     wc.hInstance = hInstance;
     wc.lpszClassName = "MyWindowClass";
     RegisterClass(&wc);
-
     // 创建窗口实例
     HWND hwnd = CreateWindowEx(
         0,
@@ -35,10 +34,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         hInstance,
         NULL
     );
-
     // 显示窗口
     ShowWindow(hwnd, nCmdShow);
-
     // 消息循环
     MSG msg = {};
     while (GetMessage(&msg, NULL, 0, 0))
@@ -46,7 +43,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
-
     return 0;
 }
 
@@ -69,20 +65,26 @@ BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam) {
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-    static HWND hEdit;
+    static HWND hEditData, hEditMethod;
     switch (uMsg)
     {
     case WM_CREATE:
-        hEdit = CreateWindowEx(0, "EDIT", "", WS_CHILD | WS_VISIBLE | WS_BORDER,
-            50, 50, 200, 25, hwnd, (HMENU)IDC_EDIT, hInst, NULL);
+        CreateWindowEx(0, "STATIC", "数据地址:",WS_CHILD | WS_VISIBLE, 
+            50, 50, 200, 25, hwnd, NULL, NULL, NULL);
+        hEditData = CreateWindowEx(0, "EDIT", "", WS_CHILD | WS_VISIBLE | WS_BORDER,
+            150, 50, 200, 25, hwnd, (HMENU)IDC_EDIT, NULL, NULL);
+        CreateWindowEx(0, "STATIC", "Call地址:",WS_CHILD | WS_VISIBLE, 
+            50, 100, 200, 25, hwnd, NULL, NULL, NULL);
+        hEditMethod = CreateWindowEx(0, "EDIT", "", WS_CHILD | WS_VISIBLE | WS_BORDER,
+            150, 100, 200, 25, hwnd, (HMENU)IDC_EDIT, NULL, NULL);
         CreateWindowEx(0, "BUTTON", "获取句柄", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-            50, 100, 80, 30, hwnd, (HMENU)ID_SAVE_BUTTON, hInst, NULL);
+            50, 200, 80, 30, hwnd, (HMENU)ID_SAVE_BUTTON, NULL, NULL);
         CreateWindowEx(0, "BUTTON", "读取内存", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-            150, 100, 80, 30, hwnd, (HMENU)ID_SHOW_BUTTON, hInst, NULL);
+            150, 200, 80, 30, hwnd, (HMENU)ID_SHOW_BUTTON, NULL, NULL);
         CreateWindowEx(0, "BUTTON", "修改内存", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-            250, 100, 80, 30, hwnd, (HMENU)ID_WRITE_BUTTON, hInst, NULL);
+            250, 200, 80, 30, hwnd, (HMENU)ID_WRITE_BUTTON, NULL, NULL);
         CreateWindowEx(0, "BUTTON", "事件触发", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-            350, 100, 80, 30, hwnd, (HMENU)ID_CALL_BUTTON, hInst, NULL);
+            350, 200, 80, 30, hwnd, (HMENU)ID_CALL_BUTTON, NULL, NULL);
         return 0;
     case WM_COMMAND:
         switch (LOWORD(wParam)) {
@@ -123,7 +125,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                 // 读取内存
 
                 HANDLE hProcess;
-                LPCVOID baseAddress = (LPCVOID)0x00257174; // 目标进程中的起始地址
+                //LPCVOID baseAddress = (LPCVOID)0x00F87170; // 目标进程中的起始地址
                 int buffer;
                 SIZE_T bytesRead;
 
@@ -140,7 +142,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 
                 // 读取数据
-                if (ReadProcessMemory(hProcess, baseAddress, &buffer, sizeof(buffer), &bytesRead)) {
+                if (ReadProcessMemory(hProcess, (LPCVOID)valueAddress, &buffer, sizeof(buffer), &bytesRead)) {
                     printf("Successfully read %zu bytes. Value: %d\n", bytesRead, buffer);
                 }
                 else {
