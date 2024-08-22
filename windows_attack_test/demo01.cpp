@@ -81,8 +81,26 @@ void getWinHwnd() {
     }
 }
 
+// 读取edit内存地址刷新
+void freshValueAddress() {
+    //int valueAddress = 0x00F87170;
+    //int callAddress = 0x00F83150;
+    char valueBuffer[11];
+
+    GetWindowText(hEditDataAddress, valueBuffer, sizeof(valueBuffer));
+    printf("valueBuffer: %s\n", valueBuffer);
+    sscanf(valueBuffer, "%x", &valueAddress);
+    printf("valueAddress: 0x%08X\n", valueAddress);
+
+    GetWindowText(hEditMethod, valueBuffer, sizeof(valueBuffer));
+    printf("valueBuffer: %s\n", valueBuffer);
+    sscanf(valueBuffer, "%x", &callAddress);
+    printf("callAddress: 0x%08X\n", callAddress);
+}
+
 // 目标进程内存读取
 void readMemAddress() {
+    freshValueAddress();
     // 获取窗口句柄
     HWND hwnd = NULL;
     EnumWindows(EnumWindowsProc, (LPARAM)&hwnd);
@@ -137,6 +155,7 @@ void readMemAddress() {
 
 // 目标进程内存写入
 void writeMemAddress() {
+    freshValueAddress();
     // 要写入的数据值
     char valueBuffer[100];
     GetWindowText(hEditDataVal, valueBuffer, sizeof(valueBuffer));
