@@ -5,7 +5,8 @@
 #define ID_SHOW_BUTTON 2
 #define IDC_EDIT 3
 HINSTANCE hInst;
-static int value = 0;; // 用于保存输入的数字变量
+int value = 0;; // 用于保存输入的数字变量
+HWND hEdit;
 
 
 // 窗口过程的回调函数
@@ -48,9 +49,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     return 0;
 }
 
+void save(HWND hwnd) {
+    // 获取编辑框中的文本
+    char buffer[100];
+    GetWindowText(hEdit, buffer, sizeof(buffer));
+    // 将文本转换为整数
+    value = strtol(buffer, NULL, 10);
+    MessageBox(hwnd, "保存成功", "提示", MB_OK);
+}
+
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-    static HWND hEdit;
+    
     switch (uMsg)
     {
     case WM_CREATE:
@@ -66,25 +76,24 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         return 0;
     case WM_COMMAND:
         switch (LOWORD(wParam)) {
-        case ID_SAVE_BUTTON:
-        {
-            // 获取编辑框中的文本
-            char buffer[100];
-            GetWindowText(hEdit, buffer, sizeof(buffer));
-            // 将文本转换为整数
-            value = strtol(buffer, NULL, 10);
-            MessageBox(hwnd, "保存成功", "提示", MB_OK);
-        }
-        break;
+            case ID_SAVE_BUTTON:
+            {
+                //char buffer[100];
+                //GetWindowText(hEdit, buffer, sizeof(buffer));
+                //value = strtol(buffer, NULL, 10);
+                //MessageBox(hwnd, "保存成功", "提示", MB_OK);
+                save(hwnd);
+            }
+            break;
 
-        case ID_SHOW_BUTTON:
-        {
-            // 显示保存的文本
-            char msg[200];
-            snprintf(msg, sizeof(msg), "Saved value: %d", value);
-            MessageBox(hwnd, msg, "提示", MB_OK);
-        }
-        break;
+            case ID_SHOW_BUTTON:
+            {
+                // 显示保存的文本
+                char msg[200];
+                snprintf(msg, sizeof(msg), "Saved value: %d", value);
+                MessageBox(hwnd, msg, "提示", MB_OK);
+            }
+            break;
         }
         return 0;
     case WM_DESTROY:
