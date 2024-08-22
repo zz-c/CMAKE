@@ -8,6 +8,7 @@
 #define ID_CALL_BUTTON 5
 int valueAddress = 0x00F87170;
 int value = 0;; // 用于保存输入的数字变量
+int callAddress = 0x00F83150;
 
 
 // 窗口过程的回调函数
@@ -183,7 +184,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                 // 读取内存
 
                 HANDLE hProcess;
-                LPVOID baseAddress = (LPVOID)0x00257174; // 目标进程中的起始地址
+                //LPVOID baseAddress = (LPVOID)0x00257174; // 目标进程中的起始地址
                 int buffer;
                 SIZE_T bytesRead;
 
@@ -201,7 +202,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                 // 将 int 数据写入目标内存
                 int value = 100; // 要写入的数据
                 SIZE_T bytesWritten;
-                if (WriteProcessMemory(hProcess, baseAddress, &value, sizeof(value), &bytesWritten)) {
+                if (WriteProcessMemory(hProcess, (LPVOID)valueAddress, &value, sizeof(value), &bytesWritten)) {
                     printf("Memory written successfully.\n");
                     printf("Bytes written: %zu\n", bytesWritten);
                 }
@@ -236,7 +237,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                 // 读取内存
 
                 HANDLE hProcess;
-                LPCVOID baseAddress = (LPCVOID)0x00257174; // 目标进程中的起始地址
+                // LPCVOID baseAddress = (LPCVOID)0x00257174; // 目标进程中的起始地址
                 int buffer;
                 SIZE_T bytesRead;
 
@@ -252,7 +253,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                 }
 
                 // 读取数据
-                if (ReadProcessMemory(hProcess, baseAddress, &buffer, sizeof(buffer), &bytesRead)) {
+                if (ReadProcessMemory(hProcess, (LPCVOID)valueAddress, &buffer, sizeof(buffer), &bytesRead)) {
                     printf("Successfully read %zu bytes. Value: %d\n", bytesRead, buffer);
                 }
                 else {
@@ -269,10 +270,10 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                 // 在目标进程中创建线程并执行
                 HANDLE hThread;
                 // LPVOID pRemoteCode = (LPVOID)0x00FE7134;
-                int pRemoteCode = 0x002516F7;
+                // int pRemoteCode = 0x002516F7;
 
                 // 在目标进程中创建线程并执行 shellcode
-                hThread = CreateRemoteThread(hProcess, NULL, 0, (LPTHREAD_START_ROUTINE)pRemoteCode, NULL, 0, &threadId);
+                hThread = CreateRemoteThread(hProcess, NULL, 0, (LPTHREAD_START_ROUTINE)callAddress, NULL, 0, &threadId);
                 if (hThread == NULL) {
                     printf("Failed to create remote thread. Error: %lu\n", GetLastError());
                     //VirtualFreeEx(hProcess, pRemoteCode, 0, MEM_RELEASE);
