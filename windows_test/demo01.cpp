@@ -4,7 +4,7 @@
 #define ID_SAVE_BUTTON 1
 #define ID_SHOW_BUTTON 2
 #define IDC_EDIT 3
-HINSTANCE hInst;
+#define ID_TEXT_AREA 4
 int value = 0;; // 用于保存输入的数字变量
 HWND hEdit;
 
@@ -65,14 +65,17 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     {
     case WM_CREATE:
         // 创建编辑框
-        hEdit = CreateWindowEx(0, "EDIT", "", WS_CHILD | WS_VISIBLE | WS_BORDER,
-            50, 50, 200, 25, hwnd, (HMENU)IDC_EDIT, hInst, NULL);
+        hEdit = CreateWindowEx(0, "EDIT", "0", WS_CHILD | WS_VISIBLE | WS_BORDER,
+            50, 50, 200, 25, hwnd, (HMENU)IDC_EDIT, NULL, NULL);
         // 创建保存按钮
         CreateWindowEx(0, "BUTTON", "保存", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-            50, 100, 80, 30, hwnd, (HMENU)ID_SAVE_BUTTON, hInst, NULL);
+            50, 100, 80, 30, hwnd, (HMENU)ID_SAVE_BUTTON, NULL, NULL);
         // 创建显示按钮
         CreateWindowEx(0, "BUTTON", "读取", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-            150, 100, 80, 30, hwnd, (HMENU)ID_SHOW_BUTTON, hInst, NULL);
+            150, 100, 80, 30, hwnd, (HMENU)ID_SHOW_BUTTON, NULL, NULL);
+        // 信息提示
+        CreateWindowEx(0, "STATIC", "", WS_CHILD | WS_VISIBLE,
+            50, 150, 200, 30, hwnd, (HMENU)ID_TEXT_AREA, NULL, NULL);
         return 0;
     case WM_COMMAND:
         switch (LOWORD(wParam)) {
