@@ -75,8 +75,10 @@ void getWinHwnd() {
         SetWindowText(hTextArea, "无法找到窗口句柄");
     }
     else {
+        // 获取当前模块的句柄，也就是程序的基地址
+        HMODULE hModule = GetModuleHandle(NULL);
         char msg[200];
-        snprintf(msg, sizeof(msg), "被攻击程序句柄: %p", hwnd);
+        snprintf(msg, sizeof(msg), "被攻击程序句柄: %p，内存基地址0x%p", hwnd, hModule);
         SetWindowText(hTextArea, msg);
     }
 }
