@@ -1,5 +1,6 @@
 ﻿#include <windows.h>
 #include <stdio.h>
+#include <tlhelp32.h>
 
 #define ID_WIN_BUTTON 1
 #define ID_READ_BUTTON 2
@@ -75,11 +76,33 @@ void getWinHwnd() {
         SetWindowText(hTextArea, "无法找到窗口句柄");
     }
     else {
+        HANDLE hModuleSnapshot;
+        MODULEENTRY32 me32;
+        DWORD processID = 0; // 设置为目标进程的PID
+
+        GetWindowThreadProcessId(hwnd, &processID);
+        // 获取模块快照
+        hModuleSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, processID);
+        if (hModuleSnapshot == INVALID_HANDLE_VALUE) {
+            printf("Error: Unable to create module snapshot.\n");
+            return;
+        }
+        me32.dwSize = sizeof(MODULEENTRY32);
+        // 获取第一个模块的信息
+        if (!Module32First(hModuleSnapshot, &me32)) {
+            printf("Error: Unable to get module information.\n");
+            CloseHandle(hModuleSnapshot);
+            return;
+        }
+
         // 获取当前模块的句柄，也就是程序的基地址
         HMODULE hModule = GetModuleHandle(NULL);
         char msg[200];
-        snprintf(msg, sizeof(msg), "被攻击程序句柄: %p，内存基地址0x%p", hwnd, hModule);
+        snprintf(msg, sizeof(msg), "被攻击程序句柄: %p，内存基地址0x%p", hwnd, me32.modBaseAddr);
         SetWindowText(hTextArea, msg);
+
+        // 关闭句柄
+        CloseHandle(hModuleSnapshot);
     }
 }
 
