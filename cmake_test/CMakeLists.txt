@@ -10,8 +10,12 @@ add_compile_definitions (COMPILE_M3=0x200)
 message("cmake_test PROJECT_BINARY_DIR = ${PROJECT_BINARY_DIR}")
 option (USE_MYDEF "Use provided math implementation" ON)
 message("USE_MYDEF = ${USE_MYDEF}")
+
+option(TEST_FLAG "单元测试开关" OFF)
+message("TEST_FLAG = ${TEST_FLAG}")
+
 if(USE_MYDEF)
-    message("USE_MYDEF add_compile_definitions COMPILE_M4")
+    message("add_compile_definitions COMPILE_M4")
     add_compile_definitions (COMPILE_M4)
 endif()
 
