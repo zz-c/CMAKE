@@ -7,5 +7,5 @@
 
 JNIEXPORT void JNICALL Java_top_zhost_jni_HelloWorldJNI_helloJNI
 (JNIEnv *, jobject, jstring){
-	printf("C printf from cmake3.8 ..");
+	printf("printf from C");
 }
