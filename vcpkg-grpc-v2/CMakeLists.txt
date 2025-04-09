@@ -9,6 +9,8 @@ find_package(Protobuf REQUIRED)
 
 message(STATUS "gRPC Found: ${gRPC_FOUND}")
 message(STATUS "Protobuf Found: ${Protobuf_FOUND}")
+message(STATUS "Using protobuf-${Protobuf_VERSION}")
+message(STATUS "Using gRPC-${gRPC_VERSION}")
 
 set(PROTO_PATH ${CMAKE_CURRENT_SOURCE_DIR}/protos)
 file(GLOB PROTO_FILES ${PROTO_PATH}/*.cc)
